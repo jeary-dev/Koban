@@ -82,3 +82,47 @@ priority:
     name: Urgent
     reporters: 4
     color: '#b33a55'
+
+# ──────────────────────────────────────────────────────────────────────
+#   Discord: a forum post per report, with buttons for staff.
+#   The bot runs inside this plugin and only connects OUT to Discord: no
+#   ports, no web server, works on shared hosting. Step by step guide:
+#   docs/discord-setup.md. After setting it up, run /koban setup.
+# ──────────────────────────────────────────────────────────────────────
+discord:
+  enabled: false
+  # From the Developer Portal: your application > Bot > Reset Token.
+  # Keep it secret: anyone with it controls the bot. Koban never logs or shows it.
+  # You can leave this empty and set the KOBAN_DISCORD_TOKEN environment variable instead.
+  token: ''
+  # Turn on Developer Mode in Discord (Settings > Advanced), then right-click > Copy ID.
+  guild-id: ''
+  # A forum channel (best: a post per report with status tags) or a text channel
+  # (a thread per report).
+  channel-id: ''
+  # The head image on each report. <uuid>, <uuid-plain> and <name> are filled in.
+  avatar-url: 'https://mc-heads.net/avatar/<uuid>/64'
+  # Create Koban's forum tags (Open, Claimed, Resolved, Dismissed and each reason)
+  # if they're missing. Needs the bot to have Manage Channels.
+  create-tags: true
+  # Copy messages staff write in a report's thread into the report as notes.
+  # This needs the privileged "Message Content" intent: turn it on in the Developer
+  # Portal (Bot > Privileged Gateway Intents) first, or the bot can't connect.
+  # Everything else works without any privileged intent.
+  sync-notes: false
+  # Which roles may do what. Role IDs: right-click the role > Copy Role ID.
+  #   view      /reports open, /reports lookup (every other action includes it)
+  #   claim     claim and unclaim
+  #   resolve   resolve, dismiss, reopen
+  #   punish    run a punishment from actions.yml
+  #   note      notes written in threads become report notes (with sync-notes)
+  #   override  act on reports someone else claimed
+  #   admin     all of the above
+  roles:
+    admin: []
+    view: []
+    claim: []
+    resolve: []
+    punish: []
+    note: []
+    override: []

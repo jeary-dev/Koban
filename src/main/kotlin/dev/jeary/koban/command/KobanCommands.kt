@@ -2,13 +2,15 @@ package dev.jeary.koban.command
 
 import com.google.gson.JsonParser
 import dev.jeary.koban.KobanCore
+import dev.jeary.koban.domain.report.PlayerRef
 import dev.jeary.koban.platform.Messenger.Companion.tag
 import dev.jeary.koban.platform.text.PaperTextSink
 import dev.jeary.koban.platform.text.TextSink
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
-/** `/koban version | reload | debug text`. */
+/** `/koban version | reload | setup | link | unlink | debug text`. */
 class KobanCommands(private val core: KobanCore, private val registry: CommandRegistry) {
 
     private val messenger get() = core.messenger
@@ -18,6 +20,34 @@ class KobanCommands(private val core: KobanCore, private val registry: CommandRe
         registry.register(root.literal("version").permission(Permissions.ADMIN).handler { ctx -> version(ctx.sender()) })
         registry.register(root.literal("reload").permission(Permissions.ADMIN).handler { ctx -> reload(ctx.sender()) })
         registry.register(root.literal("debug").literal("text").permission(Permissions.ADMIN).handler { ctx -> debugText(ctx.sender()) })
+        registry.register(
+            root.literal("link").permission(Permissions.LINK).senderType(Player::class.java)
+                .handler { ctx -> link(ctx.sender()) },
+        )
+        registry.register(
+            root.literal("unlink").permission(Permissions.LINK).senderType(Player::class.java)
+                .handler { ctx -> unlink(ctx.sender()) },
+        )
+    }
+
+    /** Shows the current link, or a code to type into `/link` on Discord. */
+    private fun link(player: Player) = registry.launch(player) {
+        val current = core.links.byMinecraft(player.uniqueId)
+        if (current != null) {
+            val name = core.discord.ready?.jda?.getUserById(current.discord)?.name ?: current.discord.toString()
+            messenger.send(player, "koban.link-current", tag("discord", name))
+        }
+        val code = core.links.issueCode(PlayerRef(player.uniqueId, player.name))
+        messenger.send(player, "koban.link-code", tag("code", code))
+    }
+
+    private fun unlink(player: Player) = registry.launch(player) {
+        val actor = core.staffActions.actor(player)
+        if (core.links.unlinkMinecraft(player.uniqueId, actor)) {
+            messenger.send(player, "koban.unlinked")
+        } else {
+            messenger.send(player, "koban.not-linked")
+        }
     }
 
     private fun version(sender: CommandSender) {
@@ -45,6 +75,7 @@ class KobanCommands(private val core: KobanCore, private val registry: CommandRe
                 outcome.warnings.take(MAX_SHOWN).forEach { messenger.send(sender, "koban.reload-problem", tag("problem", it)) }
                 outcome.warnings.forEach { core.logger.warning("Config: $it") }
                 outcome.restartRequired.forEach { messenger.send(sender, "koban.reload-restart", tag("setting", it)) }
+                if (outcome.discordReconnects) messenger.send(sender, "koban.reload-discord")
             }
         }
     }

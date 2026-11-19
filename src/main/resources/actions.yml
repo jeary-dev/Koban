@@ -1,0 +1,56 @@
+# ──────────────────────────────────────────────────────────────────────
+#   交番 Koban · punishments
+#
+#   Offered on Discord (the menu under each report, then a confirmation)
+#   and in game with /reports punish <id> <action>. Each runs a command as
+#   the server console. Up to 25.
+#
+#   Placeholders in `command`:
+#     {player}    the reported player's name (checked, never changed:
+#                 a name that isn't a valid Minecraft name is refused)
+#     {uuid}      their UUID
+#     {reason}    the report's reason, e.g. Cheating
+#     {category}  the reason key, e.g. cheating
+#     {report}    the report number
+#     {staff}     who chose the punishment
+#     {server}    server-name from config.yml
+#   Every value except {player}, {uuid} and {report} is cleaned before it's
+#   put in: only letters, digits, spaces and . , ! ? ' ( ) # : - _ remain,
+#   so nothing typed by anyone can add arguments or another command.
+#
+#   resolve: true marks the report resolved (action taken) once it has run.
+#   Examples for LiteBans, AdvancedBan and EssentialsX: docs/integrations.md
+# ──────────────────────────────────────────────────────────────────────
+
+templates:
+  warn:
+    label: Warn
+    description: A warning in chat
+    emoji: '⚠️'
+    command: 'minecraft:tell {player} You have been warned by staff for {reason} (report #{report})'
+    resolve: true
+  kick:
+    label: Kick
+    description: Kick from the server
+    emoji: '👢'
+    command: 'minecraft:kick {player} {reason} (report #{report})'
+    resolve: true
+  tempban-1d:
+    label: Ban for 1 day
+    description: Needs a ban plugin, see docs/integrations.md
+    emoji: '⏳'
+    command: 'tempban {player} 1d {reason} (report #{report})'
+    resolve: true
+  ban:
+    label: Ban
+    description: Permanent ban
+    emoji: '🔨'
+    command: 'minecraft:ban {player} {reason} (report #{report})'
+    resolve: true
+
+# Used for {reason} if the report has none.
+reason-fallback: Breaking the server rules
+
+# Bedrock players through Floodgate have a prefix (usually a dot). List it here
+# so their names are accepted: e.g. ['.'].
+allowed-name-prefixes: []

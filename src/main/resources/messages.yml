@@ -88,6 +88,10 @@ staff:
   resolve-ask: '<prefix> <#f3d1d9>Anything to note about #<id>? <#c0a0a8>(staff only; the reporter never sees it)'
   dismiss-ask: '<prefix> <#f3d1d9>Why is #<id> being dismissed? <#c0a0a8>(staff only)'
   filter-ask: '<prefix> <#f3d1d9>Show reports against which player? <#c0a0a8>skip clears the filter.'
+  punish-ran: '<prefix> <#a8c8a0>Ran <#f3d1d9><action></#f3d1d9> for #<id>: <#6b5b60><command>'
+  punish-failed: '<prefix> <#d98c8c><action> didn''t work (<reason>): <#6b5b60><command>'
+  punish-refused: '<prefix> <#d98c8c>Refused: <reason>.'
+  punish-unknown: '<prefix> <#d98c8c><action> isn''t in actions.yml. <#c0a0a8>Choose from: <#f3d1d9><actions>'
   rejected:
     needs-identity: '<prefix> <#d98c8c>Only a player or a linked Discord account can claim reports.'
     already-yours: '<prefix> <#c0a0a8>#<id> is already yours.'
@@ -136,7 +140,110 @@ koban:
   reload-failed: '<prefix> <#d98c8c>Nothing was changed: <count> problem(s) found. <#c0a0a8>The details are in the console.'
   reload-problem: '<#6b5b60>  • <#d98c8c><problem>'
   reload-restart: '<prefix> <#c0a0a8>Changes to <#f3d1d9><setting></#f3d1d9> take effect after a restart.'
+  link-code: '<prefix> <#c0a0a8>Your code is <click:copy_to_clipboard:''<code>''><hover:show_text:''<#e8a5b4>Click to copy''><#f3d1d9><b><code></b></#f3d1d9></hover></click>. <#c0a0a8>In Discord, type <#f3d1d9>/link <code></#f3d1d9> within 10 minutes.'
+  link-current: '<prefix> <#c0a0a8>You''re linked to the Discord account <#f3d1d9><discord></#f3d1d9>. <#6b5b60>/koban unlink to undo'
+  unlinked: '<prefix> <#c0a0a8>Your Discord account is no longer linked.'
+  not-linked: '<prefix> <#c0a0a8>No Discord account is linked.'
+  reload-discord: '<prefix> <#c0a0a8>The Discord bot is reconnecting with the new settings. <#6b5b60>/koban setup shows how it went.'
   debug-sink: '<prefix> <#c0a0a8>Sent through <#f3d1d9><sink></#f3d1d9>.'
   debug-roundtrip-ok: '<prefix> <#a8c8a0>Paper''s own text API read it back unchanged. <#6b5b60>(<length> characters of JSON)'
   debug-roundtrip-failed: '<prefix> <#d98c8c>Paper''s own text API read it back differently. The details are in the console.'
   debug-text: '<prefix> <#c0a0a8>Text check: <#f3d1d9><b>bold</b> <i>italic</i> <u>underlined</u></#f3d1d9> <gradient:#f3d1d9:#e8a5b4>gradient</gradient> <click:suggest_command:''/koban''><hover:show_text:''<#e8a5b4>hover works''>hover · click</hover></click> <#a8c8a0>交番 ✿</#a8c8a0>'
+
+# ──────────────────────────────────────────────────────────────────────
+#   Discord. Plain text with Discord Markdown (**bold**, > quote …); any
+#   MiniMessage colours are dropped. Names and anything players typed are
+#   escaped automatically, and no message Koban sends can ping anyone.
+# ──────────────────────────────────────────────────────────────────────
+discord:
+  # Forum tags (created by the bot if create-tags is on).
+  tag-open: Open
+  tag-claimed: Claimed
+  tag-resolved: Resolved
+  tag-dismissed: Dismissed
+  status-open: '🌸 Open'
+  status-claimed: '🔖 Claimed by <staff>'
+  status-resolved: '✅ Resolved by <staff> · <outcome>'
+  status-dismissed: '🍂 Dismissed by <staff>'
+  outcome-action: Action taken
+  outcome-none: No action needed
+  embed-author: 'Report #<id>'
+  embed-footer: 'Koban · <notes> note(s) · <uuid>'
+  field-status: Status
+  field-priority: Priority · reporters
+  field-where: Where
+  field-categories: Reasons
+  field-reporters: Reporters
+  field-player: Reported player
+  field-chat: Chat
+  field-commands: Commands
+  field-nearby: Nearby
+  state-offline: Had already left the server
+  button-claim: Claim
+  button-claim-toggle: Claim / unclaim
+  button-resolve: Resolve
+  button-dismiss: Dismiss
+  button-reopen: Reopen
+  button-run: Run it
+  button-cancel: Cancel
+  punish-placeholder: 'Punish…'
+  modal-resolve-title: 'Resolve report #{id}'
+  modal-dismiss-title: 'Dismiss report #{id}'
+  modal-outcome: Outcome
+  modal-note: Note for staff (optional)
+  modal-reason: Why? (optional, staff only)
+  modal-note-placeholder: Reporters never see this.
+  # Lines posted in the report's thread. <source> is one of the source-* texts.
+  log-merged: '➕ **<reporter>** also reported this (<category>)<details>. Reporters: <count>'
+  log-claimed: '🔖 **<staff>** claimed this <source>.'
+  log-taken-over: '🔖 **<staff>** took this over <source>.'
+  log-unclaimed: '↩️ **<staff>** unclaimed this <source>.'
+  log-resolved: '✅ **<staff>** resolved this <source>: <outcome>.<note>'
+  log-dismissed: '🍂 **<staff>** dismissed this <source>.<note>'
+  log-reopened: '🌸 **<staff>** reopened this <source>.'
+  log-note: '📝 **<staff>** <source>:<newline>> <note>'
+  log-action: '🔨 **<staff>** ran **<action>**: `<command>`'
+  source-game: in game
+  source-discord: on Discord
+  source-console: from the console
+  source-api: through another plugin
+  reply-no-permission: 'You need a role with the **<action>** permission for that (see discord.roles in config.yml).'
+  reply-wrong-server: This bot only works in the server it was set up for.
+  reply-not-found: 'Report #<id> doesn''t exist any more.'
+  reply-claimed: 'You claimed #<id>.'
+  reply-taken-over: 'You took over #<id>.'
+  reply-unclaimed: 'You unclaimed #<id>.'
+  reply-resolved: 'Resolved #<id>: <outcome>.'
+  reply-dismissed: 'Dismissed #<id>.'
+  reply-reopened: 'Reopened #<id>.'
+  reply-busy: '#<id> is changing right now. Try again.'
+  reply-cancelled: 'Another plugin on the server stopped that change to #<id>.'
+  reply-error: Something went wrong. The details are in the server console.
+  reply-rejected-needs-identity: 'Link your Minecraft account first: /koban link in game, then /link here.'
+  reply-rejected-already-yours: '#<id> is already yours.'
+  reply-rejected-claimed-by-other: '#<id> is claimed by **<staff>**.'
+  reply-rejected-not-claimed: '#<id> isn''t claimed.'
+  reply-rejected-already-closed: '#<id> is already closed.'
+  reply-rejected-not-closed: '#<id> is still open.'
+  punish-preview: 'Run **<action>** against **<player>**? This runs as the server console:<newline>```<newline><command><newline>```'
+  punish-ran: 'Done. Ran `<command>`'
+  punish-failed: 'That didn''t work (<reason>): `<command>`'
+  punish-refused: 'Refused: <reason>.'
+  punish-unknown: That action isn't in actions.yml any more.
+  punish-cancelled: Cancelled. Nothing was run.
+  punish-not-yours: Only the person who chose this action can confirm it.
+  cmd-reports: Koban reports
+  cmd-open: Open and claimed reports, most urgent first
+  cmd-lookup: Every report against a player
+  cmd-lookup-player: Minecraft name
+  cmd-link: Link your Minecraft account (use /koban link in game to get a code)
+  cmd-link-code: The code from /koban link
+  open-title: '**<count> open report(s)**'
+  open-empty: 'No open reports. 🌸'
+  open-line: '**#<id>** <thread> · <category> ×<count> · <since> · <status>'
+  lookup-unknown: 'Koban has never seen a player called **<player>**.'
+  lookup-empty: '**<player>** has never been reported.'
+  lookup-title: '**<player>**: <count> report(s)'
+  lookup-line: '**#<id>** <thread> · <category> ×<count> · <since> · <status>'
+  link-ok: 'Linked to **<player>**. Your actions here are now recorded under both accounts.'
+  link-invalid: That code isn't valid or has expired. Run /koban link in game for a new one.

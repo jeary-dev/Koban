@@ -2,6 +2,7 @@ package dev.jeary.koban.command
 
 import dev.jeary.koban.KobanCore
 import dev.jeary.koban.domain.report.Outcome
+import dev.jeary.koban.game.ActionRunner
 import dev.jeary.koban.domain.report.PlayerRef
 import dev.jeary.koban.domain.report.Report
 import dev.jeary.koban.domain.report.ReportId
@@ -97,6 +98,13 @@ class StaffCommands(private val core: KobanCore, private val registry: CommandRe
                 .required("text", greedyStringParser())
                 .handler { ctx -> registry.launch(ctx.sender()) { actions.note(ctx.sender(), ReportId(ctx.get("id")), ctx.get("text")) } },
         )
+        val actionKeys = SuggestionProvider.blocking<CommandSender> { _, _ -> core.config.actions.templates.map { Suggestion.suggestion(it.key) } }
+        registry.register(
+            root.literal("punish").permission(Permissions.PUNISH)
+                .required("id", longParser(1))
+                .required("action", stringParser(), actionKeys)
+                .handler { ctx -> punish(ctx.sender(), ReportId(ctx.get("id")), ctx.get("action")) },
+        )
         registry.register(
             root.literal("tp").permission(Permissions.TELEPORT).senderType(Player::class.java)
                 .required("id", longParser(1))
@@ -108,6 +116,31 @@ class StaffCommands(private val core: KobanCore, private val registry: CommandRe
                     }
                 },
         )
+    }
+
+    private fun punish(sender: CommandSender, id: ReportId, key: String) = registry.launch(sender) {
+        val actor = actions.actor(sender)
+        val override = sender !is Player || sender.hasPermission(Permissions.OVERRIDE)
+        val idTag = tag("id", id.value)
+        when (val result = core.actionRunner.run(id, key, actor, override)) {
+            is ActionRunner.RunResult.Ran -> {
+                messenger.send(sender, "staff.punish-ran", idTag, tag("action", result.action.label), tag("command", result.command))
+                result.resolved?.let { actions.tell(sender, id, it) }
+            }
+            is ActionRunner.RunResult.Failed ->
+                messenger.send(sender, "staff.punish-failed", idTag, tag("action", key), tag("reason", result.reason), tag("command", result.command))
+            is ActionRunner.RunResult.NotRun -> when (val preview = result.preview) {
+                ActionRunner.Preview.UnknownAction -> messenger.send(
+                    sender, "staff.punish-unknown", tag("action", key),
+                    tag("actions", core.config.actions.templates.joinToString(", ") { it.key }),
+                )
+                ActionRunner.Preview.NotFound -> actions.notFound(sender, id)
+                ActionRunner.Preview.Closed -> messenger.send(sender, "staff.rejected.already-closed", idTag)
+                is ActionRunner.Preview.ClaimedByOther -> messenger.send(sender, "staff.rejected.claimed-by-other", idTag, tag("staff", preview.staff))
+                is ActionRunner.Preview.Refused -> messenger.send(sender, "staff.punish-refused", tag("reason", preview.reason))
+                is ActionRunner.Preview.Ready -> Unit
+            }
+        }
     }
 
     private fun history(sender: CommandSender, name: String) = registry.launch(sender) {

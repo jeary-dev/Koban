@@ -12,8 +12,10 @@ import dev.jeary.koban.config.ValidationResult
 import dev.jeary.koban.domain.abuse.CooldownTracker
 import dev.jeary.koban.domain.abuse.ReportGate
 import dev.jeary.koban.domain.evidence.ChatHistory
+import dev.jeary.koban.discord.DiscordBot
 import dev.jeary.koban.domain.link.LinkCodes
 import dev.jeary.koban.game.PlayerSessions
+import dev.jeary.koban.game.ActionRunner
 import dev.jeary.koban.game.ReportFlow
 import dev.jeary.koban.game.ReportPresenter
 import dev.jeary.koban.game.StaffActions
@@ -36,6 +38,7 @@ import dev.jeary.koban.service.LinkService
 import dev.jeary.koban.service.PlayerDirectory
 import dev.jeary.koban.service.ReportService
 import dev.jeary.koban.storage.Database
+import kotlinx.coroutines.launch
 import org.bukkit.event.HandlerList
 import java.time.Clock
 import java.util.logging.Logger
@@ -86,6 +89,8 @@ class KobanCore(
     val staffMenus = StaffMenus(this)
     val flow = ReportFlow(this)
     val notifier = StaffNotifier(this)
+    val actionRunner = ActionRunner(this)
+    val discord = DiscordBot(this)
     private val sessions = PlayerSessions(this)
     val commands = CommandRegistry(this)
 
@@ -109,6 +114,8 @@ class KobanCore(
 
         reports.addListener(events)
         reports.addListener(notifier)
+        reports.addListener(discord.sync)
+        discord.start(config.discord)
 
         commands.enable()
         ReportCommands(this, commands).register()
@@ -117,6 +124,7 @@ class KobanCore(
     }
 
     fun disable() {
+        discord.stop()
         menus.closeAll()
         tps.stop()
         brands.stop()
@@ -126,7 +134,7 @@ class KobanCore(
 
     sealed interface ReloadOutcome {
         data class Refused(val errors: List<ConfigError>) : ReloadOutcome
-        data class Applied(val warnings: List<ConfigError>, val restartRequired: List<String>) : ReloadOutcome
+        data class Applied(val warnings: List<ConfigError>, val restartRequired: List<String>, val discordReconnects: Boolean) : ReloadOutcome
     }
 
     /** Validates every file first; on any error nothing changes. Main thread. */
@@ -139,10 +147,13 @@ class KobanCore(
         val restart = buildList {
             if (next.core.storage != activeStorage) add("storage")
         }
+        val reconnect = discord.needsReconnect(next.discord)
         config = next
         messenger.messages = next.messages
         applyEvidence(history, next)
-        return ReloadOutcome.Applied(loaded.warnings, restart)
+        // The bot reconnects only if its own settings changed; otherwise open threads are redrawn.
+        scope.launch { discord.apply(next.discord) }
+        return ReloadOutcome.Applied(loaded.warnings, restart, reconnect)
     }
 
     private fun applyEvidence(history: ChatHistory, config: KobanConfig) {

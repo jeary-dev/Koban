@@ -14,10 +14,12 @@ data class KobanConfig(
     val reasons: Reasons,
     val menus: MenuConfig,
     val messages: Messages,
+    val discord: DiscordSettings,
+    val actions: ActionsConfig,
 )
 
 /**
- * Reads config.yml, reasons.yml, menus.yml and messages.yml from the plugin folder (writing the
+ * Reads config.yml, reasons.yml, actions.yml, menus.yml and messages.yml from the plugin folder (writing the
  * bundled defaults first if a file is missing), validates all of them, and returns either a
  * complete [KobanConfig] or every problem found, each naming its file and setting.
  */
@@ -30,10 +32,13 @@ class ConfigLoader(private val plugin: Plugin) {
         val reasonsYaml = read(REASONS, problems)
         val menusYaml = read(MENUS, problems)
         val messagesYaml = read(MESSAGES, problems)
+        val actionsYaml = read(ACTIONS, problems)
         // A file that isn't valid YAML can't be checked any further.
-        if (listOf(configYaml, reasonsYaml, menusYaml, messagesYaml).any { it == null }) return ValidationResult.Invalid(problems)
+        if (listOf(configYaml, reasonsYaml, menusYaml, messagesYaml, actionsYaml).any { it == null }) return ValidationResult.Invalid(problems)
 
         val core = CoreSettings.parse(ConfigNode(CONFIG, requireNotNull(configYaml), "", problems))
+        val discord = DiscordSettings.parse(ConfigNode(CONFIG, configYaml, "", problems))
+        val actions = ActionsConfig.parse(ConfigNode(ACTIONS, requireNotNull(actionsYaml), "", problems))
         val reasons = Reasons.parse(ConfigNode(REASONS, requireNotNull(reasonsYaml), "", problems)) { MiniMessage.miniMessage().stripTags(it) }
         val menus = MenuConfig.parse(ConfigNode(MENUS, requireNotNull(menusYaml), "", problems))
         val messagesNode = ConfigNode(MESSAGES, requireNotNull(messagesYaml), "", problems)
@@ -48,7 +53,7 @@ class ConfigLoader(private val plugin: Plugin) {
             }
         }
 
-        return ValidationResult.of(problems) { KobanConfig(core, reasons, menus, messages) }
+        return ValidationResult.of(problems) { KobanConfig(core, reasons, menus, messages, discord, actions) }
     }
 
     private fun read(name: String, problems: MutableList<ConfigError>): YamlConfiguration? {
@@ -76,5 +81,6 @@ class ConfigLoader(private val plugin: Plugin) {
         const val REASONS = "reasons.yml"
         const val MENUS = "menus.yml"
         const val MESSAGES = "messages.yml"
+        const val ACTIONS = "actions.yml"
     }
 }

@@ -2,6 +2,7 @@ name: Koban
 version: '${project.version}'
 main: dev.jeary.koban.KobanPlugin
 api-version: '1.20'
+softdepend: [PlaceholderAPI]
 description: '${project.description}'
 author: jeary-dev
 website: '${project.url}'
@@ -16,6 +17,7 @@ libraries:
   - org.xerial:sqlite-jdbc:${sqlite.version}
   - com.mysql:mysql-connector-j:${mysql.version}
   - org.mariadb.jdbc:mariadb-java-client:${mariadb.version}
+  - net.dv8tion:JDA:${jda.version}
 
 # Commands are registered at runtime (Incendo Cloud), with tab completion.
 permissions:
