@@ -3,9 +3,13 @@ package dev.jeary.koban.command
 import com.google.gson.JsonParser
 import dev.jeary.koban.KobanCore
 import dev.jeary.koban.domain.report.PlayerRef
+import dev.jeary.koban.discord.Setup
+import dev.jeary.koban.platform.Messenger.Companion.component
 import dev.jeary.koban.platform.Messenger.Companion.tag
 import dev.jeary.koban.platform.text.PaperTextSink
 import dev.jeary.koban.platform.text.TextSink
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -19,6 +23,7 @@ class KobanCommands(private val core: KobanCore, private val registry: CommandRe
     fun register() {
         registry.register(root.literal("version").permission(Permissions.ADMIN).handler { ctx -> version(ctx.sender()) })
         registry.register(root.literal("reload").permission(Permissions.ADMIN).handler { ctx -> reload(ctx.sender()) })
+        registry.register(root.literal("setup").permission(Permissions.ADMIN).handler { ctx -> setup(ctx.sender()) })
         registry.register(root.literal("debug").literal("text").permission(Permissions.ADMIN).handler { ctx -> debugText(ctx.sender()) })
         registry.register(
             root.literal("link").permission(Permissions.LINK).senderType(Player::class.java)
@@ -48,6 +53,23 @@ class KobanCommands(private val core: KobanCore, private val registry: CommandRe
         } else {
             messenger.send(player, "koban.not-linked")
         }
+    }
+
+    /** Runs every Discord check and prints one line per check (the token is never shown). */
+    private fun setup(sender: CommandSender) {
+        messenger.send(sender, "setup.header")
+        for (line in Setup(core).check()) {
+            val bullet = when (line.level) {
+                Setup.Level.OK -> "setup.ok"
+                Setup.Level.PROBLEM -> "setup.problem"
+                Setup.Level.INFO -> "setup.info"
+            }
+            val tags = line.values.map { (k, v) ->
+                if (k == "url") component(k, Component.text(v).clickEvent(ClickEvent.openUrl(v))) else tag(k, v)
+            }.toTypedArray()
+            messenger.send(sender, messenger.component(bullet).append(messenger.component(line.key, *tags)))
+        }
+        messenger.send(sender, "setup.footer")
     }
 
     private fun version(sender: CommandSender) {

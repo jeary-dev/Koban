@@ -53,6 +53,7 @@ class ConfigLoader(private val plugin: Plugin) {
             }
         }
 
+        crossCheck(reasons, discord, problems)
         return ValidationResult.of(problems) { KobanConfig(core, reasons, menus, messages, discord, actions) }
     }
 
@@ -77,6 +78,22 @@ class ConfigLoader(private val plugin: Plugin) {
     }
 
     companion object {
+        /** Discord allows 20 forum tags: four statuses plus one per reason. */
+        private const val MAX_TAGGED_REASONS = 16
+
+        /** Checks that need more than one file. */
+        fun crossCheck(reasons: Reasons, discord: DiscordSettings, problems: MutableList<ConfigError>) {
+            if (reasons.categories.isEmpty()) problems += ConfigError(REASONS, "categories", "needs at least one reason")
+            if (discord.enabled && discord.createTags && reasons.categories.size > MAX_TAGGED_REASONS) {
+                problems += ConfigError(
+                    REASONS, "categories",
+                    "has ${reasons.categories.size} reasons, but a Discord forum holds 20 tags (4 for status + 16 reasons); " +
+                        "the rest won't get a tag",
+                    ConfigError.Severity.WARNING,
+                )
+            }
+        }
+
         const val CONFIG = "config.yml"
         const val REASONS = "reasons.yml"
         const val MENUS = "menus.yml"

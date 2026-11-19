@@ -3,7 +3,10 @@ package dev.jeary.koban.discord
 import dev.jeary.koban.config.ActionsConfig
 import dev.jeary.koban.config.ConfigError
 import dev.jeary.koban.config.ConfigNode
+import dev.jeary.koban.config.ConfigLoader
 import dev.jeary.koban.config.DiscordSettings
+import dev.jeary.koban.config.ReportCategory
+import dev.jeary.koban.config.Reasons
 import dev.jeary.koban.config.Secret
 import dev.jeary.koban.domain.evidence.ChatLine
 import dev.jeary.koban.domain.evidence.EvidenceSnapshot
@@ -18,6 +21,7 @@ import dev.jeary.koban.domain.report.Reporter
 import dev.jeary.koban.support.Players
 import dev.jeary.koban.support.openReport
 import dev.jeary.koban.support.present
+import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -204,6 +208,20 @@ class DiscordContentTest {
             val (s, problems) = parse("discord:\n  enabled: true\n  token: ''\n  guild-id: 1\n  channel-id: 2\n", mapOf(DiscordSettings.TOKEN_ENV to fakeToken))
             assertTrue(problems.none { it.path == "discord.token" })
             assertEquals(fakeToken, s.token.reveal())
+        }
+
+        @Test
+        fun `more reasons than forum tags is a warning, only when tags are created`() {
+            val (s, _) = parse("discord:\n  enabled: true\n  token: '$fakeToken'\n  guild-id: 1\n  channel-id: 2\n")
+            fun reasons(n: Int) = Reasons((1..n).map { ReportCategory("r$it", "R$it", "R$it", Material.PAPER, null, emptyList(), false) })
+            fun check(n: Int, settings: DiscordSettings) = ArrayList<ConfigError>().also { ConfigLoader.crossCheck(reasons(n), settings, it) }
+
+            assertEquals(emptyList<ConfigError>(), check(16, s))
+            val warned = check(17, s)
+            assertEquals(1, warned.size)
+            assertFalse(warned.single().isError)
+            assertEquals(emptyList<ConfigError>(), check(17, s.copy(createTags = false)))
+            assertTrue(check(0, s).single().isError)
         }
 
         @Test
