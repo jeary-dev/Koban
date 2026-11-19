@@ -8,6 +8,7 @@ import dev.jeary.koban.platform.Messenger
 import dev.jeary.koban.platform.Messenger.Companion.tag
 import dev.jeary.koban.platform.compat.Compat
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
@@ -21,8 +22,13 @@ class MenuUi(private val messenger: Messenger, private val menus: () -> MenuConf
     fun text(raw: String, vararg tags: TagResolver): String = messenger.itemText(raw, *tags)
 
     fun lines(raw: List<String>, vararg tags: TagResolver): List<String> = raw.flatMap { line ->
-        // A tag that expands to several lines (a list of reporters, say) becomes several lore lines.
-        text(line, *tags).split('\n')
+        // A tag that expands to several lines (a list of reporters, say) becomes several lore
+        // lines. Each continuation starts with a reset plus the colour in effect where the previous
+        // line ended: without a code at the start, the client would draw it purple and italic.
+        val parts = text(line, *tags).split('\n')
+        parts.mapIndexed { i, part ->
+            if (i == 0) part else ChatColor.RESET.toString() + ChatColor.getLastColors(parts[i - 1]) + part
+        }
     }
 
     fun title(raw: String, vararg tags: TagResolver): String = messenger.title(raw, *tags)

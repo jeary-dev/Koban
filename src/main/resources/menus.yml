@@ -48,3 +48,194 @@ report-reasons:
       material: [CHERRY_LEAVES, PINK_PETALS, PINK_TULIP]
       name: '<#c0a0a8>Cancel'
       action: close
+
+# /reports: every report, most reporters first, then oldest.
+# Placeholders: <view> <filter> <count> <page> <pages>; on each entry also
+#   <id> <player> <status> <category> <extra> <reporters> <priority> <age> <last>
+#   <created> <server> <location> <claimed-by> <outcome> <closed-by>
+report-list:
+  title: '<#6b5b60>交番</#6b5b60> <#4a3a40>Reports · <view> <#6b5b60>(<page>/<pages>)'
+  layout:
+    - 'xxxxxxxxx'
+    - 'xxxxxxxxx'
+    - 'xxxxxxxxx'
+    - 'xxxxxxxxx'
+    - 'xxxxxxxxx'
+    - 'p#svf#r#n'
+  content-char: x
+  entry:
+    name: '<#f3d1d9>#<id> <player> <#6b5b60>· <#e8a5b4><category></#e8a5b4> <extra>'
+    lore:
+      - '<status>'
+      - '<#c0a0a8>Reporters: <#f3d1d9><reporters></#f3d1d9> <#6b5b60>(<priority>)'
+      - '<#c0a0a8>First reported <#f3d1d9><age></#f3d1d9> ago, last <#f3d1d9><last></#f3d1d9> ago'
+      - '<#c0a0a8>Where: <#f3d1d9><location></#f3d1d9> <#6b5b60>(<server>)'
+      - ''
+      - '<#e8a5b4>▸ Click to open'
+  items:
+    p:
+      material: ARROW
+      name: '<#f3d1d9>Previous page'
+      action: previous-page
+    n:
+      material: ARROW
+      name: '<#f3d1d9>Next page'
+      action: next-page
+    s:
+      material: [CHERRY_SIGN, OAK_SIGN]
+      name: '<#f3d1d9>Showing: <view>'
+      lore:
+        - '<#c0a0a8>Click for open → claimed → closed.'
+      action: status
+    v:
+      material: HOPPER
+      name: '<#f3d1d9>Filter: <filter>'
+      lore:
+        - '<#c0a0a8>Left click: next category'
+        - '<#c0a0a8>Right click: previous category'
+      action: category
+    f:
+      material: NAME_TAG
+      name: '<#f3d1d9>Filter by player'
+      lore:
+        - '<#c0a0a8>Type a name in chat.'
+      action: player
+    r:
+      material: [CHERRY_SAPLING, OAK_SAPLING]
+      name: '<#c0a0a8>Clear filters'
+      action: clear-filters
+
+# /reports history <player>: every report against one player, newest first.
+report-history:
+  title: '<#6b5b60>交番</#6b5b60> <#4a3a40>History · <player> <#6b5b60>(<count>)'
+  layout:
+    - 'xxxxxxxxx'
+    - 'xxxxxxxxx'
+    - 'xxxxxxxxx'
+    - 'p###b###n'
+  content-char: x
+  entry:
+    name: '<#f3d1d9>#<id> <#e8a5b4><category></#e8a5b4> <extra> <#6b5b60>· <created>'
+    lore:
+      - '<status>'
+      - '<#c0a0a8>Reporters: <#f3d1d9><reporters></#f3d1d9>'
+      - '<#c0a0a8><age> ago on <server>'
+      - ''
+      - '<#e8a5b4>▸ Click to open'
+  items:
+    p:
+      material: ARROW
+      name: '<#f3d1d9>Previous page'
+      action: previous-page
+    n:
+      material: ARROW
+      name: '<#f3d1d9>Next page'
+      action: next-page
+    b:
+      material: [CHERRY_DOOR, OAK_DOOR]
+      name: '<#c0a0a8>All reports'
+      action: back
+
+# One report. Placeholders: everything report-list has, plus
+#   <categories> <reporter-list> <chat> <commands> <nearby> <notes> <state>
+#   <tps> <note-count> <claim-action>
+report-view:
+  title: '<#6b5b60>交番</#6b5b60> <#4a3a40>#<id> · <player>'
+  layout:
+    - '####h####'
+    - '#c#e#w#k#'
+    - '#t#a#o#d#'
+    - '#q#l#y#u#'
+    - 'b#######r'
+  dynamic-char: h
+  head:
+    name: '<#f3d1d9>#<id> <player>'
+    lore:
+      - '<status>'
+      - '<#c0a0a8>Reported <#f3d1d9><age></#f3d1d9> ago on <server>'
+      - '<#c0a0a8>At <#f3d1d9><location>'
+      - '<state>'
+      - ''
+      - '<#c0a0a8>Categories:'
+      - '<categories>'
+  items:
+    c:
+      material: [WRITABLE_BOOK, BOOK]
+      name: '<#f3d1d9>Chat'
+      lore:
+        - '<chat>'
+      action: none
+    e:
+      material: PLAYER_HEAD
+      name: '<#f3d1d9>Reporters <#6b5b60>(<reporters>)'
+      lore:
+        - '<reporter-list>'
+      action: none
+    w:
+      material: SPYGLASS
+      name: '<#f3d1d9>Nearby <#6b5b60>· TPS <tps>'
+      lore:
+        - '<nearby>'
+      action: none
+    k:
+      material: COMMAND_BLOCK
+      name: '<#f3d1d9>Commands'
+      lore:
+        - '<commands>'
+      action: none
+    t:
+      material: ENDER_PEARL
+      name: '<#f3d1d9>Teleport'
+      lore:
+        - '<#c0a0a8>To <location>'
+      action: teleport
+    a:
+      material: [CHERRY_HANGING_SIGN, OAK_SIGN]
+      name: '<claim-action>'
+      lore:
+        - '<#c0a0a8>Claimed by <#f3d1d9><claimed-by>'
+      action: claim
+    o:
+      material: [WRITABLE_BOOK, PAPER]
+      name: '<#f3d1d9>Add a note <#6b5b60>(<note-count>)'
+      lore:
+        - '<notes>'
+      action: note
+    d:
+      material: BOOKSHELF
+      name: '<#f3d1d9>History of <player>'
+      action: history
+    q:
+      material: LIME_DYE
+      name: '<#a8c8a0>Resolve · action taken'
+      lore:
+        - '<#c0a0a8>The reporters hear that action was taken.'
+      action: resolve
+    l:
+      material: LIGHT_BLUE_DYE
+      name: '<#b7a6d9>Resolve · no action needed'
+      lore:
+        - '<#c0a0a8>The reporters hear nothing was needed.'
+      action: resolve-no-action
+    y:
+      material: GRAY_DYE
+      name: '<#c0a0a8>Dismiss'
+      lore:
+        - '<#c0a0a8>Not a real problem. Reporters hear'
+        - '<#c0a0a8>that no action was needed.'
+      action: dismiss
+    u:
+      material: [CHERRY_LEAVES, OAK_LEAVES]
+      name: '<#e8a5b4>Reopen'
+      lore:
+        - '<#c0a0a8>Closed: <status>'
+        - '<#c0a0a8>By <closed-by>'
+      action: reopen
+    b:
+      material: [CHERRY_DOOR, OAK_DOOR]
+      name: '<#c0a0a8>Back'
+      action: back
+    r:
+      material: CLOCK
+      name: '<#c0a0a8>Refresh'
+      action: refresh

@@ -4,6 +4,7 @@ import dev.jeary.koban.api.BukkitReportEvents
 import dev.jeary.koban.command.CommandRegistry
 import dev.jeary.koban.command.KobanCommands
 import dev.jeary.koban.command.ReportCommands
+import dev.jeary.koban.command.StaffCommands
 import dev.jeary.koban.config.ConfigError
 import dev.jeary.koban.config.ConfigLoader
 import dev.jeary.koban.config.KobanConfig
@@ -14,10 +15,13 @@ import dev.jeary.koban.domain.evidence.ChatHistory
 import dev.jeary.koban.domain.link.LinkCodes
 import dev.jeary.koban.game.PlayerSessions
 import dev.jeary.koban.game.ReportFlow
+import dev.jeary.koban.game.ReportPresenter
+import dev.jeary.koban.game.StaffActions
 import dev.jeary.koban.game.StaffNotifier
 import dev.jeary.koban.menu.ChatPrompts
 import dev.jeary.koban.menu.MenuListener
 import dev.jeary.koban.menu.MenuUi
+import dev.jeary.koban.menu.StaffMenus
 import dev.jeary.koban.platform.MainThreadDispatcher
 import dev.jeary.koban.platform.Messenger
 import dev.jeary.koban.platform.PluginScope
@@ -77,6 +81,9 @@ class KobanCore(
     val audit = AuditService(database, clock)
     val directory = PlayerDirectory(database, clock)
 
+    val presenter = ReportPresenter(this)
+    val staffActions = StaffActions(this)
+    val staffMenus = StaffMenus(this)
     val flow = ReportFlow(this)
     val notifier = StaffNotifier(this)
     private val sessions = PlayerSessions(this)
@@ -105,6 +112,7 @@ class KobanCore(
 
         commands.enable()
         ReportCommands(this, commands).register()
+        StaffCommands(this, commands).register()
         KobanCommands(this, commands).register()
     }
 

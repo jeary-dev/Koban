@@ -54,6 +54,81 @@ staff:
   no-details: 'No details given'
   join-summary: '<prefix> <click:run_command:''/reports''><hover:show_text:''<#e8a5b4>Click to see them''><#f3d1d9><open></#f3d1d9> <#c0a0a8>open report(s) waiting<claimed>. <#6b5b60>/reports</#6b5b60></hover></click>'
   join-summary-claimed: ', <#f3d1d9><count></#f3d1d9> claimed by you'
+  # Someone else changed a report (in game or on Discord). <change> is one of the change.* texts.
+  alert-change: '<prefix> <click:run_command:''/reports view <id>''><hover:show_text:''<#e8a5b4>Click to open''><#f3d1d9><staff></#f3d1d9> <#c0a0a8><change></#c0a0a8> <#f3d1d9>#<id> <player></#f3d1d9></hover></click>'
+  alert-note: '<prefix> <click:run_command:''/reports view <id>''><hover:show_text:''<#e8a5b4>Click to open''><#f3d1d9><staff></#f3d1d9> <#c0a0a8>added a note to</#c0a0a8> <#f3d1d9>#<id></#f3d1d9><#6b5b60>: <body></#6b5b60></hover></click>'
+  change:
+    claimed: claimed
+    taken-over: took over
+    unclaimed: unclaimed
+    resolved: resolved
+    dismissed: dismissed
+    reopened: reopened
+  claimed: '<prefix> <#a8c8a0>You claimed <#f3d1d9>#<id></#f3d1d9> (<player>).'
+  taken-over: '<prefix> <#a8c8a0>You took over <#f3d1d9>#<id></#f3d1d9> (<player>).'
+  unclaimed: '<prefix> <#c0a0a8>You gave <#f3d1d9>#<id></#f3d1d9> back to the queue.'
+  resolved: '<prefix> <#a8c8a0>Resolved <#f3d1d9>#<id></#f3d1d9> (<player>): <outcome>.'
+  dismissed: '<prefix> <#c0a0a8>Dismissed <#f3d1d9>#<id></#f3d1d9> (<player>).'
+  reopened: '<prefix> <#c0a0a8>Reopened <#f3d1d9>#<id></#f3d1d9> (<player>).'
+  note-added: '<prefix> <#a8c8a0>Note added to <#f3d1d9>#<id></#f3d1d9>.'
+  note-empty: '<prefix> <#d98c8c>A note needs some text.'
+  not-found: '<prefix> <#d98c8c>There''s no report <#f3d1d9>#<id></#f3d1d9>.'
+  cancelled: '<prefix> <#c0a0a8>Another plugin stopped that change to #<id>.'
+  no-location: '<prefix> <#d98c8c>#<id> has no location to go to (its world may be gone).'
+  teleported: '<prefix> <#c0a0a8>Teleported to where <#f3d1d9>#<id></#f3d1d9> was reported: <#f3d1d9><location>'
+  unknown-player: '<prefix> <#d98c8c>Koban has never seen a player called <#f3d1d9><player></#f3d1d9>.'
+  unknown-outcome: '<prefix> <#d98c8c><outcome> isn''t an outcome. <#c0a0a8>Use <#f3d1d9>action</#f3d1d9> or <#f3d1d9>no-action</#f3d1d9>.'
+  history-empty: '<prefix> <#c0a0a8><player> has never been reported.'
+  history-header: '<prefix> <#c0a0a8>Reports against <#f3d1d9><player></#f3d1d9> (<count>):'
+  console-line: '<#6b5b60>  #<id></#6b5b60> <#f3d1d9><player></#f3d1d9> <#c0a0a8><category> <#6b5b60>×<reporters> · <age> ago ·</#6b5b60> <status>'
+  console-reporter: '<#6b5b60>    · <#c0a0a8><reporter> (<category>): <#f3d1d9><details>'
+  console-note: '<#6b5b60>    ✎ <#c0a0a8><author>: <#f3d1d9><body>'
+  # Questions asked in chat from the report menu.
+  note-ask: '<prefix> <#f3d1d9>Note for #<id>?'
+  resolve-ask: '<prefix> <#f3d1d9>Anything to note about #<id>? <#c0a0a8>(staff only; the reporter never sees it)'
+  dismiss-ask: '<prefix> <#f3d1d9>Why is #<id> being dismissed? <#c0a0a8>(staff only)'
+  filter-ask: '<prefix> <#f3d1d9>Show reports against which player? <#c0a0a8>skip clears the filter.'
+  rejected:
+    needs-identity: '<prefix> <#d98c8c>Only a player or a linked Discord account can claim reports.'
+    already-yours: '<prefix> <#c0a0a8>#<id> is already yours.'
+    claimed-by-other: '<prefix> <#d98c8c>#<id> is claimed by <#f3d1d9><staff></#f3d1d9>.'
+    not-claimed: '<prefix> <#c0a0a8>#<id> isn''t claimed.'
+    already-closed: '<prefix> <#c0a0a8>#<id> is already closed.'
+    not-closed: '<prefix> <#c0a0a8>#<id> is still open.'
+
+# How report states read, everywhere.
+status:
+  open: '<#e8a5b4>Open'
+  claimed: '<#b7a6d9>Claimed by <staff>'
+  resolved: '<#a8c8a0>Resolved · <outcome>'
+  dismissed: '<#c0a0a8>Dismissed'
+outcome:
+  action-taken: action taken
+  no-action: no action needed
+
+# Pieces of the report menus (menus.yml uses them as placeholders).
+view:
+  list-open: Open
+  list-claimed: Claimed
+  list-closed: Closed
+  no-filter: everything
+  nobody: nobody
+  unknown: unknown
+  none: '<#6b5b60>  none'
+  category-line: '<#e8a5b4>  ▪ <#f3d1d9><category> <#6b5b60>×<count>'
+  reporter-line: '<#c0a0a8>  <reporter> <#6b5b60>· <category> · <age> ago'
+  details-line: '<#f3d1d9>    <text>'
+  chat-line: '<#6b5b60>  <time> <#c0a0a8><name>: <#f3d1d9><text>'
+  chat-line-reported: '<#6b5b60>  <time> <#d98c8c><name>: <#f3d1d9><text>'
+  wrap-line: '<#f3d1d9>      <text>'
+  command-line: '<#6b5b60>  <time> <#f3d1d9><text>'
+  nearby-line: '<#c0a0a8>  <name> <#6b5b60><distance>m'
+  note-line: '<#c0a0a8>  <author> <#6b5b60>· <source> · <age> ago'
+  state: '<#c0a0a8>  <gamemode> · <health>♥ · <ping>ms · <brand>'
+  state-offline: '<#6b5b60>  had already left'
+  claim: '<#a8c8a0>Claim'
+  claim-release: '<#c0a0a8>Unclaim'
+  claim-take-over: '<#d9738c>Take over'
 
 koban:
   version: '<prefix> <#c0a0a8>Koban <#f3d1d9><version></#f3d1d9> on <platform> <server-version>. <#6b5b60>Text: <sink></#6b5b60>'

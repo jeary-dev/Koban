@@ -2,6 +2,7 @@ package dev.jeary.koban.game
 
 import dev.jeary.koban.KobanCore
 import dev.jeary.koban.command.Permissions
+import dev.jeary.koban.domain.actor.Source
 import dev.jeary.koban.domain.report.Change
 import dev.jeary.koban.domain.report.Outcome
 import dev.jeary.koban.domain.report.ReportStatus
@@ -34,8 +35,50 @@ class StaffNotifier(private val core: KobanCore) : ReportListener {
         when (change) {
             is ReportChange.Created -> alert("staff.alert-new", change)
             is ReportChange.Merged -> alert("staff.alert-merged", change)
-            is ReportChange.Transitioned -> if (change.transition.change in CLOSING) deliverToOnlineReporters(change)
-            is ReportChange.NoteAdded -> Unit
+            is ReportChange.Transitioned -> {
+                changed(change)
+                if (change.transition.change in CLOSING) deliverToOnlineReporters(change)
+            }
+            is ReportChange.NoteAdded -> if (change.note.source == Source.DISCORD) discordNote(change)
+        }
+    }
+
+    /** Tells other staff online what changed; whoever made the change already knows. */
+    private suspend fun changed(change: ReportChange.Transitioned) {
+        val report = change.report
+        val key = when (change.transition.change) {
+            Change.CLAIMED -> "staff.change.claimed"
+            Change.TAKEN_OVER -> "staff.change.taken-over"
+            Change.UNCLAIMED -> "staff.change.unclaimed"
+            Change.RESOLVED -> "staff.change.resolved"
+            Change.DISMISSED -> "staff.change.dismissed"
+            Change.REOPENED -> "staff.change.reopened"
+        }
+        val actor = change.actor.staff?.minecraft
+        withContext(core.main) {
+            val tags = arrayOf(
+                tag("id", report.id.value),
+                tag("player", report.reported.name),
+                tag("staff", change.actor.displayName),
+                tag("change", messenger.plain(key)),
+            )
+            for (staff in Bukkit.getOnlinePlayers()) {
+                if (staff.uniqueId != actor && staff.hasPermission(Permissions.NOTIFY)) messenger.send(staff, "staff.alert-change", *tags)
+            }
+        }
+    }
+
+    private suspend fun discordNote(change: ReportChange.NoteAdded) {
+        val report = change.report
+        withContext(core.main) {
+            val tags = arrayOf(
+                tag("id", report.id.value),
+                tag("staff", change.note.authorName),
+                tag("body", change.note.body.take(NOTE_PREVIEW)),
+            )
+            for (staff in Bukkit.getOnlinePlayers()) {
+                if (staff.hasPermission(Permissions.NOTIFY)) messenger.send(staff, "staff.alert-note", *tags)
+            }
         }
     }
 
@@ -119,5 +162,6 @@ class StaffNotifier(private val core: KobanCore) : ReportListener {
 
     private companion object {
         val CLOSING = setOf(Change.RESOLVED, Change.DISMISSED)
+        const val NOTE_PREVIEW = 120
     }
 }

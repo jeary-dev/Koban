@@ -10,6 +10,27 @@ enum class MenuAction(val id: String) {
     BACK("back"),
     PREVIOUS_PAGE("previous-page"),
     NEXT_PAGE("next-page"),
+
+    // /reports list and history
+    /** Cycle open → claimed → closed → all. */
+    STATUS("status"),
+    /** Cycle the category filter through reasons.yml. */
+    CATEGORY("category"),
+    /** Ask for a player name in chat and filter by it. */
+    PLAYER("player"),
+    CLEAR_FILTERS("clear-filters"),
+    REFRESH("refresh"),
+
+    // A report
+    TELEPORT("teleport"),
+    /** Claim, unclaim, or take over (with koban.override), whichever applies. */
+    CLAIM("claim"),
+    NOTE("note"),
+    RESOLVE("resolve"),
+    RESOLVE_NO_ACTION("resolve-no-action"),
+    DISMISS("dismiss"),
+    REOPEN("reopen"),
+    HISTORY("history"),
     ;
 
     companion object {
@@ -66,11 +87,20 @@ data class TextBlock(val name: String, val lore: List<String>)
 /** The `/report` reason menu. */
 data class ReasonMenuConfig(val layout: MenuLayout, val target: TextBlock, val reasonLore: List<String>)
 
+/** A list of reports (`/reports`, history): [entry] is drawn once per report. */
+data class ReportListConfig(val layout: MenuLayout, val entry: TextBlock)
+
+/** One report. [head] is the reported player's head in the dynamic slots. */
+data class ReportViewConfig(val layout: MenuLayout, val head: TextBlock)
+
 /** menus.yml. Each layout is read again on every open, so `/koban reload` applies at once. */
 data class MenuConfig(
     val filler: MenuItem,
     val clickSound: String?,
     val reasons: ReasonMenuConfig,
+    val reports: ReportListConfig,
+    val view: ReportViewConfig,
+    val history: ReportListConfig,
 ) {
     companion object {
         fun parse(root: ConfigNode): MenuConfig {
@@ -86,8 +116,19 @@ data class MenuConfig(
                     target = textBlock(root.nodeOrEmpty("report-reasons").nodeOrEmpty("target"), "<player>"),
                     reasonLore = root.nodeOrEmpty("report-reasons").stringList("reason-lore"),
                 ),
+                reports = listConfig(root, "report-list"),
+                view = ReportViewConfig(
+                    layout = parseLayout(root, "report-view", contentRequired = false, dynamicRequired = true),
+                    head = textBlock(root.nodeOrEmpty("report-view").nodeOrEmpty("head"), "<player>"),
+                ),
+                history = listConfig(root, "report-history"),
             )
         }
+
+        private fun listConfig(root: ConfigNode, key: String) = ReportListConfig(
+            layout = parseLayout(root, key, contentRequired = true, dynamicRequired = false),
+            entry = textBlock(root.nodeOrEmpty(key).nodeOrEmpty("entry"), "#<id> <player>"),
+        )
 
         fun textBlock(node: ConfigNode, defaultName: String) = TextBlock(node.string("name", defaultName), node.stringList("lore"))
 
