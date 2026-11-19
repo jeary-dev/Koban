@@ -116,6 +116,12 @@ class KobanCore(
         reports.addListener(notifier)
         reports.addListener(discord.sync)
         discord.start(config.discord)
+        // Only touches PlaceholderAPI's classes when it's installed.
+        if (pm.getPlugin("PlaceholderAPI") != null) {
+            val expansion = dev.jeary.koban.hook.KobanPlaceholders(this).start()
+            stopPlaceholders = { expansion.stop() }
+            logger.info("PlaceholderAPI found: %koban_...% placeholders registered.")
+        }
 
         commands.enable()
         ReportCommands(this, commands).register()
@@ -123,7 +129,11 @@ class KobanCore(
         KobanCommands(this, commands).register()
     }
 
+    private var stopPlaceholders: (() -> Unit)? = null
+
     fun disable() {
+        stopPlaceholders?.invoke()
+        stopPlaceholders = null
         discord.stop()
         menus.closeAll()
         tps.stop()
