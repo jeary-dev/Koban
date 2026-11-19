@@ -1,0 +1,50 @@
+# ──────────────────────────────────────────────────────────────────────
+#   交番 Koban · menus
+#
+#   Each menu is drawn as a grid: one string of 9 characters per row.
+#   Every character is a slot:
+#     '#'           the shared filler below
+#     ' '           an empty slot
+#     content-char  where Koban lists things (reasons, reports)
+#     dynamic-char  slots Koban fills itself (the reported player's head)
+#     anything else must be defined under `items`
+#
+#   Names and lore are MiniMessage. Actions: none, close, back,
+#   previous-page, next-page.
+#   A button whose action can't be used right now (no previous page …)
+#   shows the filler instead. `material` can be a list: the first item
+#   this server version knows is used.
+# ──────────────────────────────────────────────────────────────────────
+
+filler:
+  material: [PINK_STAINED_GLASS_PANE, WHITE_STAINED_GLASS_PANE]
+  name: ' '
+
+# A sound for every button click (a sound key such as ui.button.click), or '' for none.
+click-sound: ui.button.click
+
+# /report <player>: choose a reason. Placeholders: <player> <page> <pages>
+report-reasons:
+  title: '<#6b5b60>交番</#6b5b60> <#4a3a40>Report <player>'
+  layout:
+    - '####h####'
+    - '#xxxxxxx#'
+    - '####c####'
+  content-char: x
+  dynamic-char: h
+  # The reported player's head, in the dynamic slot.
+  target:
+    name: '<#f3d1d9><player>'
+    lore:
+      - '<#c0a0a8>Choose what they did.'
+      - '<#6b5b60>Staff see your report with'
+      - '<#6b5b60>recent chat and where it happened.'
+  # Added under each reason's own description (reasons.yml).
+  reason-lore:
+    - ''
+    - '<#e8a5b4>▸ Click to report'
+  items:
+    c:
+      material: [CHERRY_LEAVES, PINK_PETALS, PINK_TULIP]
+      name: '<#c0a0a8>Cancel'
+      action: close

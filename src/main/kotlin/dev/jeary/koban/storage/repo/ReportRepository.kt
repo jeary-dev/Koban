@@ -33,6 +33,8 @@ data class ReportQuery(
     val category: String? = null,
     /** Only reports against this player. */
     val reported: UUID? = null,
+    /** Only reports claimed by this Minecraft account. */
+    val claimedBy: UUID? = null,
     val order: Order = Order.PRIORITY,
     val limit: Int = 45,
     val offset: Int = 0,
@@ -151,6 +153,10 @@ class ReportRepository {
         params.addAll(query.statuses)
         query.reported?.let {
             clauses += "reported_uuid = ?"
+            params += it
+        }
+        query.claimedBy?.let {
+            clauses += "claimed_by_uuid = ?"
             params += it
         }
         query.category?.let {

@@ -1,0 +1,45 @@
+# ──────────────────────────────────────────────────────────────────────
+#   交番 Koban · report reasons
+#
+#   The categories players choose from in /report, in this order.
+#   The key (cheating, harassment …) is stored with each report and used
+#   for forum tags on Discord, so rename the `name`, not the key.
+#
+#   icon:  an item, or a list of items (the first one this server
+#          version knows is used)
+#   name / description:  MiniMessage
+#   ask-details:  ask the reporter to describe what happened
+#                 (only when reports.ask-details is on in config.yml)
+# ──────────────────────────────────────────────────────────────────────
+
+categories:
+  cheating:
+    name: '<#f3d1d9>Cheating'
+    icon: DIAMOND_SWORD
+    description:
+      - '<#c0a0a8>Hacked clients, x-ray, fly,'
+      - '<#c0a0a8>kill aura, auto-clickers.'
+  harassment:
+    name: '<#f3d1d9>Harassment'
+    icon: [WITHER_ROSE, POPPY]
+    description:
+      - '<#c0a0a8>Insults, threats, bullying'
+      - '<#c0a0a8>or hateful language.'
+  griefing:
+    name: '<#f3d1d9>Griefing'
+    icon: TNT
+    description:
+      - '<#c0a0a8>Breaking or stealing what'
+      - '<#c0a0a8>others have built.'
+  spam:
+    name: '<#f3d1d9>Spam'
+    icon: [WRITABLE_BOOK, BOOK]
+    description:
+      - '<#c0a0a8>Flooding chat, advertising,'
+      - '<#c0a0a8>repeated messages.'
+  other:
+    name: '<#f3d1d9>Something else'
+    icon: [CHERRY_SAPLING, OAK_SAPLING]
+    description:
+      - '<#c0a0a8>Anything not listed above.'
+      - '<#c0a0a8>You''ll be asked to explain.'

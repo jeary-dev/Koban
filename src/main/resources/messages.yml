@@ -1,0 +1,67 @@
+# ──────────────────────────────────────────────────────────────────────
+#   交番 Koban · messages
+#
+#   Every message is MiniMessage: https://docs.advntr.dev/minimessage/format.html
+#   <prefix> inserts the prefix below. Set a message to '' to switch it off.
+#   Missing keys fall back to the defaults, so updates never show blanks.
+#   Anything a player typed (names, details, notes) is inserted as plain
+#   text, so tags inside it are shown, never run.
+#
+#   Palette · sakura #f3d1d9 · petal #e8a5b4 · muted #c0a0a8
+#             ink #6b5b60 · error #d98c8c · matcha #a8c8a0 · fuji #b7a6d9
+# ──────────────────────────────────────────────────────────────────────
+
+prefix: '<#e8a5b4>交</#e8a5b4> <#c9a0a8>Koban</#c9a0a8> <#6b5b60>·</#6b5b60>'
+
+command:
+  no-permission: '<prefix> <#d98c8c>You don''t have permission to do that.'
+  players-only: '<prefix> <#d98c8c>Only players can do that.'
+  invalid-syntax: '<prefix> <#c0a0a8>Usage: <#f3d1d9><syntax>'
+  invalid-argument: '<prefix> <#d98c8c><reason>'
+  error: '<prefix> <#d98c8c>Something went wrong. The details are in the console.'
+  busy: '<prefix> <#c0a0a8>That report is changing right now. Please try again.'
+
+prompt:
+  hint: '<#6b5b60>  Type your answer in chat, or <#c0a0a8>cancel</#c0a0a8>. (<seconds>s)'
+  hint-optional: '<#6b5b60>  Type it in chat, <#c0a0a8>skip</#c0a0a8> to leave it out, or <#c0a0a8>cancel</#c0a0a8>. (<seconds>s)'
+  timeout: '<prefix> <#c0a0a8>No answer, so nothing was sent.'
+  cancelled: '<prefix> <#c0a0a8>Cancelled.'
+
+report:
+  not-found: '<prefix> <#d98c8c>Nobody called <#f3d1d9><player></#f3d1d9> is online.'
+  self: '<prefix> <#d98c8c>You can''t report yourself.'
+  exempt: '<prefix> <#d98c8c><player> can''t be reported.'
+  unknown-reason: '<prefix> <#d98c8c><reason> isn''t a report reason. <#c0a0a8>Choose from: <#f3d1d9><reasons>'
+  cooldown: '<prefix> <#c0a0a8>You can report again in <#f3d1d9><time></#f3d1d9>.'
+  too-many-open: '<prefix> <#c0a0a8>You already have <#f3d1d9><limit></#f3d1d9> open reports. Staff will get to them soon.'
+  already-reported: '<prefix> <#c0a0a8>You''ve already reported <#f3d1d9><player></#f3d1d9>. Staff are on it.'
+  cancelled: '<prefix> <#c0a0a8>Your report couldn''t be sent right now.'
+  ask-details: '<prefix> <#f3d1d9>What did <player> do? <#c0a0a8>A sentence helps staff a lot.'
+  sent: '<prefix> <#a8c8a0>Thank you. <#c0a0a8>Your report on <#f3d1d9><player></#f3d1d9> was sent to staff.'
+  # When someone else already reported the same player: <count> is how many have now.
+  sent-merged: '<prefix> <#a8c8a0>Thank you. <#c0a0a8><#f3d1d9><player></#f3d1d9> was already reported; yours has been added (<count> reports).'
+  error: '<prefix> <#d98c8c>Your report couldn''t be saved. Please try again in a moment.'
+
+feedback:
+  # Reporters are told what happened, never the punishment itself.
+  action-taken: '<prefix> <#a8c8a0>Your report on <#f3d1d9><player></#f3d1d9> was handled, and action was taken. <#c0a0a8>Thank you.'
+  no-action: '<prefix> <#c0a0a8>Your report on <#f3d1d9><player></#f3d1d9> was looked at. No action was needed this time. Thank you.'
+
+staff:
+  # Live alert for players with koban.notify. Click opens the report.
+  alert-new: '<prefix> <click:run_command:''/reports view <id>''><hover:show_text:''<#f3d1d9>#<id></#f3d1d9><newline><#c0a0a8>Reported by <reporter><newline><#c0a0a8><details><newline><newline><#e8a5b4>Click to open''><#f3d1d9><reporter></#f3d1d9> <#c0a0a8>reported</#c0a0a8> <#f3d1d9><player></#f3d1d9> <#c0a0a8>for</#c0a0a8> <#e8a5b4><category></#e8a5b4> <#6b5b60>#<id> · click to open</#6b5b60></hover></click>'
+  alert-merged: '<prefix> <click:run_command:''/reports view <id>''><hover:show_text:''<#f3d1d9>#<id></#f3d1d9><newline><#c0a0a8><count> reports now<newline><newline><#e8a5b4>Click to open''><#f3d1d9><reporter></#f3d1d9> <#c0a0a8>also reported</#c0a0a8> <#f3d1d9><player></#f3d1d9> <#6b5b60>(<#e8a5b4>×<count></#e8a5b4>) #<id> · click to open</#6b5b60></hover></click>'
+  no-details: 'No details given'
+  join-summary: '<prefix> <click:run_command:''/reports''><hover:show_text:''<#e8a5b4>Click to see them''><#f3d1d9><open></#f3d1d9> <#c0a0a8>open report(s) waiting<claimed>. <#6b5b60>/reports</#6b5b60></hover></click>'
+  join-summary-claimed: ', <#f3d1d9><count></#f3d1d9> claimed by you'
+
+koban:
+  version: '<prefix> <#c0a0a8>Koban <#f3d1d9><version></#f3d1d9> on <platform> <server-version>. <#6b5b60>Text: <sink></#6b5b60>'
+  reloaded: '<prefix> <#a8c8a0>Reloaded. <#c0a0a8><summary>'
+  reload-failed: '<prefix> <#d98c8c>Nothing was changed: <count> problem(s) found. <#c0a0a8>The details are in the console.'
+  reload-problem: '<#6b5b60>  • <#d98c8c><problem>'
+  reload-restart: '<prefix> <#c0a0a8>Changes to <#f3d1d9><setting></#f3d1d9> take effect after a restart.'
+  debug-sink: '<prefix> <#c0a0a8>Sent through <#f3d1d9><sink></#f3d1d9>.'
+  debug-roundtrip-ok: '<prefix> <#a8c8a0>Paper''s own text API read it back unchanged. <#6b5b60>(<length> characters of JSON)'
+  debug-roundtrip-failed: '<prefix> <#d98c8c>Paper''s own text API read it back differently. The details are in the console.'
+  debug-text: '<prefix> <#c0a0a8>Text check: <#f3d1d9><b>bold</b> <i>italic</i> <u>underlined</u></#f3d1d9> <gradient:#f3d1d9:#e8a5b4>gradient</gradient> <click:suggest_command:''/koban''><hover:show_text:''<#e8a5b4>hover works''>hover · click</hover></click> <#a8c8a0>交番 ✿</#a8c8a0>'

@@ -16,3 +16,69 @@ libraries:
   - org.xerial:sqlite-jdbc:${sqlite.version}
   - com.mysql:mysql-connector-j:${mysql.version}
   - org.mariadb.jdbc:mariadb-java-client:${mariadb.version}
+
+# Commands are registered at runtime (Incendo Cloud), with tab completion.
+permissions:
+  koban.report:
+    description: File reports with /report.
+    default: true
+  koban.link:
+    description: Link a Discord account with /koban link.
+    default: true
+  koban.exempt:
+    description: Can't be reported.
+    default: false
+  koban.bypass.cooldown:
+    description: Skip the time between reports.
+    default: op
+  koban.bypass.limit:
+    description: Skip the limit on open reports per reporter.
+    default: op
+  koban.notify:
+    description: Live alerts for new reports and a summary of open reports on join.
+    default: op
+  koban.staff:
+    description: Open /reports and view reports, their evidence and history.
+    default: op
+    children:
+      koban.notify: true
+  koban.claim:
+    description: Claim and unclaim reports.
+    default: op
+  koban.resolve:
+    description: Resolve, dismiss and reopen reports.
+    default: op
+  koban.note:
+    description: Add notes to reports.
+    default: op
+  koban.teleport:
+    description: Teleport to where a report was made.
+    default: op
+  koban.history:
+    description: See a player's report history with /reports history.
+    default: op
+  koban.punish:
+    description: Run punishment templates from actions.yml.
+    default: op
+  koban.override:
+    description: Act on reports claimed by someone else.
+    default: op
+  koban.moderator:
+    description: Everything a moderator needs.
+    default: op
+    children:
+      koban.staff: true
+      koban.claim: true
+      koban.resolve: true
+      koban.note: true
+      koban.teleport: true
+      koban.history: true
+      koban.punish: true
+      koban.bypass.cooldown: true
+  koban.admin:
+    description: /koban reload, setup and debug, plus everything else.
+    default: op
+    children:
+      koban.moderator: true
+      koban.override: true
+      koban.bypass.limit: true

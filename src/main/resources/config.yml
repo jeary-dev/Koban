@@ -34,3 +34,51 @@ reports:
   # A report against a player who already has an open report filed within this
   # window joins it: one report per player, every reporter listed, a counter shown.
   merge-window: 30m
+  # After choosing a reason, ask the reporter to describe what happened (they can
+  # skip it). Categories can turn this off one by one in reasons.yml.
+  ask-details: true
+  details-timeout: 60s
+  # Let players report someone who left within evidence.retain-after-quit.
+  allow-recently-left: true
+
+# Captured automatically the moment a report is made.
+evidence:
+  chat:
+    # Recent chat lines kept per online player, in memory only. Nothing is written
+    # anywhere unless that player is the reporter or the reported player.
+    buffer-size: 25
+    # Lines of each player's chat copied into the report.
+    lines: 10
+  # Witnesses: other players this close to the reported player (vanished staff never count).
+  nearby-radius: 32
+  max-nearby: 10
+  # The reported player's recent commands. Off by default. Login, register, password and
+  # similar commands are never recorded; add your own with never-record.
+  commands:
+    enabled: false
+    lines: 10
+    never-record: []
+  # How long a player who left can still be reported (their chat is kept that long, then dropped).
+  retain-after-quit: 5m
+
+notifications:
+  # Played to staff (koban.notify) with each new report: a sound key, or '' for none.
+  alert-sound: block.note_block.chime
+  # Tell staff how many reports are open when they join.
+  join-summary: true
+  join-summary-delay: 3s
+
+# Report priority by number of reporters: the colour of the Discord embed while it's open.
+priority:
+  normal:
+    name: Normal
+    reporters: 1
+    color: '#e8a5b4'
+  raised:
+    name: Raised
+    reporters: 2
+    color: '#d9738c'
+  urgent:
+    name: Urgent
+    reporters: 4
+    color: '#b33a55'

@@ -121,18 +121,26 @@ class ReportService(
 
     // ------------------------------------------------------------------ filing
 
+    /**
+     * The anti-abuse checks [create] runs, without filing anything: lets the reason menu refuse
+     * straight away instead of after the reporter has picked a reason and typed details.
+     */
+    suspend fun precheck(reporter: UUID, reported: UUID, bypassCooldown: Boolean, bypassLimit: Boolean): GateResult {
+        val config = settings()
+        gate.precheck(reporter, reported, config.antiAbuse, bypassCooldown)
+            .takeUnless { it == GateResult.Allowed }
+            ?.let { return it }
+        if (!gate.limitApplies(config.antiAbuse, bypassLimit)) return GateResult.Allowed
+        val open = database.read { reports.countActiveByReporter(it, reporter) }
+        return gate.checkOpenLimit(open, config.antiAbuse)
+    }
+
     suspend fun create(draft: ReportDraft): CreateResult {
         val config = settings()
         val reporterId = draft.reporter.uuid
-        gate.precheck(reporterId, draft.reported.uuid, config.antiAbuse, draft.bypassCooldown)
+        precheck(reporterId, draft.reported.uuid, draft.bypassCooldown, draft.bypassLimit)
             .takeUnless { it == GateResult.Allowed }
             ?.let { return CreateResult.Denied(it) }
-        if (gate.limitApplies(config.antiAbuse, draft.bypassLimit)) {
-            val open = database.read { reports.countActiveByReporter(it, reporterId) }
-            gate.checkOpenLimit(open, config.antiAbuse)
-                .takeUnless { it == GateResult.Allowed }
-                ?.let { return CreateResult.Denied(it) }
-        }
 
         val details = ReportText.clean(draft.details, ReportText.MAX_DETAILS)
         val merge = MergePolicy(config.mergeWindow)
