@@ -1,0 +1,16 @@
+# Build output
+target/
+dependency-reduced-pom.xml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local test servers, JDKs and the Discord test bot token (never commit)
+run/
+.claude/settings.local.json

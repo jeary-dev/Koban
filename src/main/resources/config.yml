@@ -1,0 +1,36 @@
+# ──────────────────────────────────────────────────────────────────────
+#   交番 Koban · player reports and moderation, with a Discord bot inside
+#
+#   /koban reload checks every file first. If anything is wrong it names
+#   the file, the setting and the problem, and keeps the old settings.
+#   Durations: 30s, 15m, 12h, 7d, or a combination such as 1h30m.
+# ──────────────────────────────────────────────────────────────────────
+
+# Shown on reports and in Discord, so staff on a network know where a report came from.
+server-name: survival
+
+storage:
+  # sqlite (a file in the plugin folder, nothing to set up), mysql or mariadb.
+  type: sqlite
+  sqlite:
+    file: koban.db
+  mysql:
+    host: localhost
+    port: 3306
+    database: koban
+    username: koban
+    password: ''
+    pool-size: 6
+    # Extra JDBC connection properties, e.g. useSSL: 'false'
+    properties: {}
+
+reports:
+  # How long a reporter waits between reports. 0 turns it off.
+  # (koban.bypass.cooldown skips it.)
+  cooldown: 60s
+  # How many of one player's reports may be open at once. 0 means no limit.
+  # (koban.bypass.limit skips it.)
+  max-open-per-reporter: 3
+  # A report against a player who already has an open report filed within this
+  # window joins it: one report per player, every reporter listed, a counter shown.
+  merge-window: 30m
